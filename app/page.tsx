@@ -1,65 +1,166 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Building2, Search, Shield, Zap, Home, DollarSign } from 'lucide-react';
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col">
+      {/* Hero Section */}
+      <section className="relative py-20 md:py-32 bg-gradient-to-br from-primary/10 via-background to-background">
+        <div className="container">
+          <div className="max-w-3xl mx-auto text-center space-y-8">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
+              Find Your Perfect
+              <span className="text-primary"> Accommodation</span>
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Quality student housing and rental properties in Nairobi. 
+              Affordable, secure, and conveniently located.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" asChild>
+                <Link href="/rooms">
+                  <Search className="mr-2 h-5 w-5" />
+                  Browse Rooms
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/apartments">
+                  <Building2 className="mr-2 h-5 w-5" />
+                  View Apartments
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 md:py-24">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Why Choose Pahali Pazuri?
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              We make finding and booking accommodation simple, secure, and stress-free
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <Shield className="h-10 w-10 text-primary mb-2" />
+                <CardTitle>Verified Properties</CardTitle>
+                <CardDescription>
+                  All properties are verified and inspected for quality and safety
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <DollarSign className="h-10 w-10 text-primary mb-2" />
+                <CardTitle>Affordable Pricing</CardTitle>
+                <CardDescription>
+                  Competitive rates with flexible payment plans to suit your budget
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <Zap className="h-10 w-10 text-primary mb-2" />
+                <CardTitle>Instant Booking</CardTitle>
+                <CardDescription>
+                  Book your room instantly online with secure payment options
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <Home className="h-10 w-10 text-primary mb-2" />
+                <CardTitle>Prime Locations</CardTitle>
+                <CardDescription>
+                  Properties near universities, transport, and essential amenities
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <Shield className="h-10 w-10 text-primary mb-2" />
+                <CardTitle>24/7 Support</CardTitle>
+                <CardDescription>
+                  Dedicated support team to assist you with any issues or queries
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <Building2 className="h-10 w-10 text-primary mb-2" />
+                <CardTitle>Modern Facilities</CardTitle>
+                <CardDescription>
+                  Well-maintained properties with modern amenities and furnishings
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 md:py-24 bg-primary text-primary-foreground">
+        <div className="container">
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Ready to Find Your New Home?
+            </h2>
+            <p className="text-lg opacity-90">
+              Join thousands of students who have found their perfect accommodation with us
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <Button size="lg" variant="secondary" asChild>
+                <Link href="/register">
+                  Get Started
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
+                <Link href="/about">
+                  Learn More
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 md:py-24 border-t">
+        <div className="container">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-4xl font-bold text-primary mb-2">500+</div>
+              <div className="text-muted-foreground">Available Rooms</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-primary mb-2">50+</div>
+              <div className="text-muted-foreground">Apartment Buildings</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-primary mb-2">2000+</div>
+              <div className="text-muted-foreground">Happy Tenants</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
+              <div className="text-muted-foreground">Support Available</div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
