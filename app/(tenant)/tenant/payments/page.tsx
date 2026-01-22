@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CreditCard, CheckCircle2, XCircle, Clock, Download } from 'lucide-react';
-import { paymentsApi, bookingsApi } from '@/lib/api';
+import { paymentsApi } from '@/lib/api';
+import { enhancedBookingsApi } from '@/lib/api/bookings';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { ErrorMessage } from '@/components/shared/ErrorMessage';
 import MpesaPaymentForm from '@/components/payments/MpesaPaymentForm';
@@ -43,7 +44,7 @@ export default function PaymentsPage() {
       setLoading(true);
       
       // Fetch bookings first
-      const bookingsRes = await bookingsApi.getUserBookings();
+      const bookingsRes = await enhancedBookingsApi.getMyBookings();
       const bookings = bookingsRes.data || [];
       
       // Fetch payments for all bookings

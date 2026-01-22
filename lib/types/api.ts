@@ -34,6 +34,24 @@ export interface Role {
   slug: string;
 }
 
+export interface TenantProfile {
+  first_name: string;
+  last_name: string;
+  dob: string;
+  gender: 'male' | 'female';
+  id_number: string;
+}
+
+export interface UserPreferences {
+  gender_preference?: 'male_only' | 'female_only' | 'mixed';
+}
+
+export interface EmergencyContact {
+  name: string;
+  relationship: string;
+  phone: string;
+}
+
 export interface User {
   id: number;
   name: string;
@@ -45,6 +63,9 @@ export interface User {
   role: Role | 'tenant' | 'admin' | 'super-admin' | 'staff' | 'maintenance_staff'; // Can be object (from API) or string (legacy/stored)
   email_verified_at: string | null;
   notification_preferences: NotificationPreferences;
+  tenant_profile?: TenantProfile;
+  preferences?: UserPreferences;
+  emergency_contact?: EmergencyContact;
   created_at: string;
   updated_at: string;
 }
@@ -108,10 +129,9 @@ export interface Apartment {
 }
 
 // Room Types
-export type RoomType = 'private' | 'shared_dorm'; // Updated from backend
+export type RoomType = 'single_bed' | 'double_bed' | '3_beds' | '4_beds' | 'private' | 'shared_dorm'; // Bed-based accommodation types
 export type BedType = 'single' | 'twin' | 'double_decker_2' | 'double_decker_4' | 'mixed' | 'bunk';
 export type RoomStatus = 'available' | 'occupied' | 'maintenance' | 'reserved';
-export type LocationType = 'near_campus' | 'moderate' | 'far_campus';
 export type GenderType = 'mixed' | 'male_only' | 'female_only';
 export type SharingType = 'single' | '2_sharing' | '3_sharing' | '4_sharing';
 
@@ -140,7 +160,6 @@ export interface Room {
   status: RoomStatus;
   is_furnished: boolean;
   furnishing_details?: string | null;
-  location_type: LocationType;
   gender_type: GenderType;
   sharing_type: SharingType;
   created_at: string;
@@ -210,6 +229,14 @@ export interface CreateBookingData {
   number_of_occupants: number;
   bed_number?: number;
   special_requests?: string;
+  // Personal information
+  first_name: string;
+  last_name: string;
+  date_of_birth: string;
+  gender: 'male' | 'female';
+  id_number: string;
+  gender_preference: 'male_only' | 'female_only' | 'mixed';
+  // Emergency contact
   emergency_contact_name: string;
   emergency_contact_phone: string;
   emergency_contact_relationship: string;

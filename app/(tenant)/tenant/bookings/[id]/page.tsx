@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard, XCircle, ArrowLeft, Download } from 'lucide-react';
 import Link from 'next/link';
-import { bookingsApi } from '@/lib/api';
+import { enhancedBookingsApi } from '@/lib/api/bookings';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { ErrorMessage } from '@/components/shared/ErrorMessage';
 import type { Booking } from '@/lib/types/api';
@@ -24,7 +24,7 @@ export default function BookingDetailsPage() {
   const fetchBooking = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await bookingsApi.getBooking(bookingId);
+      const response = await enhancedBookingsApi.getById(bookingId);
       setBooking(response.data);
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
@@ -42,7 +42,14 @@ export default function BookingDetailsPage() {
     if (!confirm('Are you sure you want to cancel this booking?')) return;
 
     try {
-      await bookingsApi.cancelBooking(bookingId);
+      // Use v2 API for cancellation
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v2/bookings/${bookingId}/cancel`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      });
       router.push('/tenant/bookings');
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
@@ -187,36 +194,22 @@ export default function BookingDetailsPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Base Rent</span>
-                  <span className="font-medium">KES {booking.base_rent.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Service Fee</span>
-                  <span className="font-medium">KES {booking.service_fee.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Deposit</span>
-                  <span className="font-medium">KES {booking.deposit_amount.toLocaleString()}</span>
-                </div>
-                {booking.discount_amount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount</span>
-                    <span>- KES {booking.discount_amount.toLocaleString()}</span>
-                  </div>
-                )}
-                <div className="flex justify-between font-semibold pt-2 border-t">
+                <div className="flex justify-between font-semibold">
                   <span>Total Amount</span>
                   <span>KES {booking.total_amount.toLocaleString()}</span>
                 </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Duration</span>
+                  <span>{booking.duration_months} months{booking.duration_days ? ` (${booking.duration_days} days)` : ''}</span>
+                </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Amount Paid</span>
-                  <span className="font-medium text-green-600">KES {booking.amount_paid.toLocaleString()}</span>
+                  <span className="font-medium text-green-600">KES {(booking.amount_paid || 0).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between font-semibold">
                   <span>Balance</span>
-                  <span className={booking.balance > 0 ? 'text-red-600' : 'text-green-600'}>
-                    KES {booking.balance.toLocaleString()}
+                  <span className={(booking.balance || booking.total_amount) > 0 ? 'text-red-600' : 'text-green-600'}>
+                    KES {(booking.balance || booking.total_amount).toLocaleString()}
                   </span>
                 </div>
               </div>

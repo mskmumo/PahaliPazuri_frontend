@@ -8,7 +8,7 @@ import TenantSidebar from '@/components/layout/TenantSidebar';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import Link from 'next/link';
-import { Home, Calendar, CreditCard, Wrench, MessageSquare, FileText, Bell, User } from 'lucide-react';
+import { Home, Calendar, CreditCard, Wrench, FileText, Bell, User, HelpCircle } from 'lucide-react';
 
 export default function TenantLayout({
   children,
@@ -58,16 +58,16 @@ export default function TenantLayout({
     { href: '/tenant/bookings', label: 'My Bookings', icon: Calendar },
     { href: '/tenant/payments', label: 'Payments', icon: CreditCard },
     { href: '/tenant/maintenance', label: 'Maintenance', icon: Wrench },
-    { href: '/tenant/messages', label: 'Messages', icon: MessageSquare },
     { href: '/tenant/documents', label: 'Documents', icon: FileText },
     { href: '/tenant/notifications', label: 'Notifications', icon: Bell },
+    { href: '/tenant/contact', label: 'Contact Support', icon: HelpCircle },
     { href: '/tenant/profile', label: 'Profile', icon: User },
   ];
 
   return (
     <div className="flex min-h-screen bg-gray-50">
       <TenantSidebar menuItems={menuItems} user={user} />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 ml-64 overflow-auto">
         {/* Top Bar */}
         <div className="sticky top-0 z-30 bg-white border-b px-6 py-4">
           <div className="flex items-center justify-between">
@@ -88,7 +88,7 @@ export default function TenantLayout({
         </div>
         
         {/* Content Area */}
-        <div className="p-6 lg:p-8">
+        <div className="p-6">
           {children}
         </div>
       </main>

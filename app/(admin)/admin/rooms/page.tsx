@@ -1,13 +1,14 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Edit } from 'lucide-react';
+import { Search, Plus, Edit, Eye, Home, Bed, Filter } from 'lucide-react';
 import Link from 'next/link';
 import { Room } from '@/lib/types/api';
+import { roomsApi } from '@/lib/api/rooms';
 
 export default function AdminRoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -15,7 +16,6 @@ export default function AdminRoomsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  // Derive filtered rooms from rooms, searchQuery, and statusFilter
   const filteredRooms = useMemo(() => {
     let filtered = [...rooms];
 
@@ -36,72 +36,12 @@ export default function AdminRoomsPage() {
     const fetchRooms = async () => {
       try {
         setLoading(true);
-        // TODO: Implement actual API call
-        // const response = await adminApi.getAllRooms();
-        
-        // Mock data
-        setTimeout(() => {
-          const mockRooms: Room[] = [
-            {
-              id: 5,
-              apartment_id: 1,
-              room_number: 'R-101',
-              room_type: 'single',
-              base_price: 15000,
-              actual_price: 15000,
-              description: null,
-              floor: 1,
-              amenities: [],
-              images: [],
-              status: 'occupied',
-              available_beds: 0,
-              total_beds: 1,
-              allowed_gender: 'any',
-              has_private_bathroom: true,
-              has_kitchen: false,
-              is_furnished: true,
-              size_sqm: null,
-              condition: 'good',
-              last_maintenance_date: null,
-              view_quality: 'good',
-              noise_level: 'moderate',
-              natural_light: 'good',
-              created_at: '2024-01-01T10:00:00Z',
-              updated_at: '2024-01-15T10:00:00Z',
-            },
-            {
-              id: 6,
-              apartment_id: 1,
-              room_number: 'R-102',
-              room_type: 'double',
-              base_price: 12000,
-              actual_price: 12000,
-              description: null,
-              floor: 1,
-              amenities: [],
-              images: [],
-              status: 'available',
-              available_beds: 2,
-              total_beds: 2,
-              allowed_gender: 'any',
-              has_private_bathroom: true,
-              has_kitchen: false,
-              is_furnished: true,
-              size_sqm: null,
-              condition: 'good',
-              last_maintenance_date: null,
-              view_quality: 'good',
-              noise_level: 'moderate',
-              natural_light: 'good',
-              created_at: '2024-01-01T10:00:00Z',
-              updated_at: '2024-01-01T10:00:00Z',
-            },
-          ];
-          setRooms(mockRooms);
-          setLoading(false);
-        }, 500);
+        const response = await roomsApi.getAll();
+        setRooms(response.data || []);
       } catch (err) {
         console.error('Failed to fetch rooms:', err);
+        setRooms([]);
+      } finally {
         setLoading(false);
       }
     };
@@ -112,131 +52,264 @@ export default function AdminRoomsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'available':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 hover:bg-green-200';
       case 'occupied':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+      case 'reserved':
+        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
       case 'maintenance':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-red-100 text-red-800 hover:bg-red-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading rooms...</p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto"></div>
+          <p className="text-lg text-muted-foreground font-medium">Loading rooms...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="w-full space-y-8">
+      {/* Header with Action */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Room Management</h1>
-          <p className="text-gray-600 mt-2">Manage all rooms and their availability</p>
+          <h1 className="text-4xl font-bold tracking-tight">Room Management</h1>
+          <p className="text-muted-foreground text-lg">Manage all rooms and availability</p>
         </div>
         <Link href="/admin/rooms/new">
-          <Button className="flex items-center gap-2">
+          <Button className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-shadow">
             <Plus className="h-4 w-4" />
             Add Room
           </Button>
         </Link>
       </div>
 
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Available</p>
+                <p className="text-3xl font-bold text-green-600">
+                  {rooms.filter((r) => r.status === 'available').length}
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                <Home className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-all">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Occupied</p>
+                <p className="text-3xl font-bold text-blue-600">
+                  {rooms.filter((r) => r.status === 'occupied').length}
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <Bed className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-red-500 shadow-md hover:shadow-lg transition-all">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Maintenance</p>
+                <p className="text-3xl font-bold text-red-600">
+                  {rooms.filter((r) => r.status === 'maintenance').length}
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+                <Home className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-purple-500 shadow-md hover:shadow-lg transition-all">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Rooms</p>
+                <p className="text-3xl font-bold text-purple-600">{rooms.length}</p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
+                <Home className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Search & Filters */}
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="shadow-md">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Filter className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-lg">Filters</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search by room number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-11"
               />
             </div>
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full h-11 px-3 py-2 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-all"
               aria-label="Filter rooms by status"
             >
               <option value="all">All Statuses</option>
               <option value="available">Available</option>
               <option value="occupied">Occupied</option>
+              <option value="reserved">Reserved</option>
               <option value="maintenance">Maintenance</option>
             </select>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between pt-4 border-t">
+            <p className="text-sm text-muted-foreground">
+              Showing <span className="font-semibold text-foreground">{filteredRooms.length}</span> of <span className="font-semibold text-foreground">{rooms.length}</span> rooms
+            </p>
+            {(searchQuery || statusFilter !== 'all') && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => {
+                  setSearchQuery('');
+                  setStatusFilter('all');
+                }}
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Results count */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600">
-          Showing {filteredRooms.length} of {rooms.length} rooms
-        </p>
-      </div>
-
-      {/* Rooms Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredRooms.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <p className="text-gray-500">No rooms found</p>
-          </div>
-        ) : (
-          filteredRooms.map((room) => (
-            <Card key={room.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{room.room_number}</CardTitle>
-                    <p className="text-sm text-gray-600 capitalize">{room.room_type}</p>
-                  </div>
-                  <Badge className={getStatusColor(room.status)}>
-                    {room.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Floor:</span>
-                    <span className="font-medium">{room.floor}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Total Beds:</span>
-                    <span className="font-medium">{room.total_beds}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Available:</span>
-                    <span className="font-medium">{room.available_beds}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Monthly Rent:</span>
-                    <span className="font-medium">KES {room.actual_price.toLocaleString()}</span>
-                  </div>
-                </div>
-
-                <Link href={`/admin/rooms/${room.id}/edit`}>
-                  <Button variant="outline" size="sm" className="w-full">
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Room
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+      {/* Rooms Table */}
+      <Card className="shadow-md">
+        <CardHeader>
+          <CardTitle>All Rooms</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {filteredRooms.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="h-16 w-16 rounded-full bg-muted mx-auto flex items-center justify-center mb-4">
+                <Home className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">No rooms found</h3>
+              <p className="text-muted-foreground">
+                {searchQuery || statusFilter !== 'all' 
+                  ? 'Try adjusting your filters' 
+                  : 'Add your first room to get started'}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="text-left py-4 px-4 font-semibold text-sm">Room Number</th>
+                    <th className="text-left py-4 px-4 font-semibold text-sm">Type</th>
+                    <th className="text-left py-4 px-4 font-semibold text-sm">Floor</th>
+                    <th className="text-left py-4 px-4 font-semibold text-sm">Beds</th>
+                    <th className="text-left py-4 px-4 font-semibold text-sm">Available</th>
+                    <th className="text-left py-4 px-4 font-semibold text-sm">Price/Month</th>
+                    <th className="text-left py-4 px-4 font-semibold text-sm">Gender</th>
+                    <th className="text-left py-4 px-4 font-semibold text-sm">Status</th>
+                    <th className="text-right py-4 px-4 font-semibold text-sm">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRooms.map((room) => (
+                    <tr key={room.id} className="border-b hover:bg-muted/30 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="font-semibold">{room.room_number}</div>
+                        <div className="text-xs text-muted-foreground">{room.room_code}</div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="capitalize">{room.room_type?.replace('_', ' ')}</div>
+                        <div className="text-xs text-muted-foreground capitalize">{room.sharing_type}</div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="font-medium">{room.floor_number}</div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="font-medium">{room.total_beds}</div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className={room.available_beds > 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                          {room.available_beds}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="font-semibold">
+                          KES {(room.actual_price || room.price_per_month || 0).toLocaleString()}
+                        </div>
+                        {room.total_beds > 1 && (
+                          <div className="text-xs text-muted-foreground">
+                            {room.price_per_bed_month?.toLocaleString()} / bed
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-4 px-4">
+                        <Badge variant="outline" className="capitalize">
+                          {room.gender_type || room.allowed_gender}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4">
+                        <Badge className={getStatusColor(room.status)}>
+                          {room.status}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link href={`/admin/rooms/${room.id}`}>
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Link href={`/admin/rooms/${room.id}/edit`}>
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
+

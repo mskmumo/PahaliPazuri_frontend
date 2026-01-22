@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,6 +47,7 @@ interface DashboardStats {
 }
 
 export default function AdminDashboardPage() {
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     tenants: { total: 0, active: 0, inactive: 0 },
     bookings: { total: 0, pending: 0, confirmed: 0, active: 0 },
@@ -54,28 +55,27 @@ export default function AdminDashboardPage() {
     payments: { totalRevenue: 0, pendingPayments: 0, paidThisMonth: 0 },
     occupancy: { totalRooms: 0, occupiedRooms: 0, availableRooms: 0, occupancyRate: 0 },
   });
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
         setLoading(true);
-        // TODO: Implement actual API calls when admin endpoints are ready
+        // TODO: Implement actual API call
         // const response = await adminApi.getDashboardStats();
         
-        // Mock data for now
+        // Mock data
         setTimeout(() => {
           setStats({
             tenants: { total: 45, active: 42, inactive: 3 },
-            bookings: { total: 68, pending: 5, confirmed: 8, active: 55 },
-            maintenance: { total: 23, pending: 7, inProgress: 9, completed: 7 },
+            bookings: { total: 68, pending: 5, confirmed: 15, active: 48 },
+            maintenance: { total: 23, pending: 7, inProgress: 8, completed: 8 },
             payments: { totalRevenue: 2450000, pendingPayments: 8, paidThisMonth: 1850000 },
             occupancy: { totalRooms: 60, occupiedRooms: 52, availableRooms: 8, occupancyRate: 86.7 },
           });
           setLoading(false);
         }, 500);
-      } catch (err) {
-        console.error('Failed to fetch dashboard stats:', err);
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error);
         setLoading(false);
       }
     };
@@ -90,87 +90,89 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto"></div>
+          <p className="text-lg text-muted-foreground font-medium">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome to Pahali Pazuri Management System</p>
-      </div>
-
+    <div className="w-full space-y-8">
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Tenants */}
-        <Card>
+        <Card className="border-l-4 border-l-purple-500 shadow-md hover:shadow-lg transition-all">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Tenants</p>
-                <p className="text-2xl font-bold">{stats.tenants.total}</p>
-                <p className="text-xs text-green-600 mt-1">
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Tenants</p>
+                <p className="text-3xl font-bold text-purple-600">{stats.tenants.total}</p>
+                <p className="text-xs text-green-600 font-medium">
                   {stats.tenants.active} active
                 </p>
               </div>
-              <Users className="h-8 w-8 text-purple-600" />
+              <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Total Bookings */}
-        <Card>
+        <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-all">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Bookings</p>
-                <p className="text-2xl font-bold">{stats.bookings.total}</p>
-                <p className="text-xs text-blue-600 mt-1">
-                  {stats.bookings.pending} pending approval
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Bookings</p>
+                <p className="text-3xl font-bold text-blue-600">{stats.bookings.total}</p>
+                <p className="text-xs text-yellow-600 font-medium">
+                  {stats.bookings.pending} pending
                 </p>
               </div>
-              <Calendar className="h-8 w-8 text-blue-600" />
+              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Maintenance Requests */}
-        <Card>
+        <Card className="border-l-4 border-l-yellow-500 shadow-md hover:shadow-lg transition-all">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Maintenance</p>
-                <p className="text-2xl font-bold">{stats.maintenance.total}</p>
-                <p className="text-xs text-yellow-600 mt-1">
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Maintenance</p>
+                <p className="text-3xl font-bold text-yellow-600">{stats.maintenance.total}</p>
+                <p className="text-xs text-orange-600 font-medium">
                   {stats.maintenance.pending} pending
                 </p>
               </div>
-              <Wrench className="h-8 w-8 text-yellow-600" />
+              <div className="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                <Wrench className="h-6 w-6 text-yellow-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Revenue */}
-        <Card>
+        <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold">
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Revenue</p>
+                <p className="text-3xl font-bold text-green-600">
                   KES {(stats.payments.totalRevenue / 1000).toFixed(0)}K
                 </p>
-                <p className="text-xs text-green-600 mt-1">
+                <p className="text-xs text-green-600 font-medium">
                   +{(stats.payments.paidThisMonth / 1000).toFixed(0)}K this month
                 </p>
               </div>
-              <CreditCard className="h-8 w-8 text-green-600" />
+              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                <CreditCard className="h-6 w-6 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -179,7 +181,7 @@ export default function AdminDashboardPage() {
       {/* Occupancy & Status Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Occupancy */}
-        <Card>
+        <Card className="shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
@@ -189,32 +191,32 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Occupancy Rate</span>
-                <span className="text-2xl font-bold text-purple-600">
+                <span className="text-sm text-muted-foreground">Occupancy Rate</span>
+                <span className="text-3xl font-bold text-purple-600">
                   {stats.occupancy.occupancyRate}%
                 </span>
               </div>
               
-              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
                 <div 
-                  className="bg-purple-600 h-3 rounded-full transition-all"
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 h-4 rounded-full transition-all duration-500"
                   style={{ width: `${clampedOccupancyRate}%` } as React.CSSProperties}
                   aria-hidden="true"
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-4 pt-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{stats.occupancy.totalRooms}</p>
-                  <p className="text-xs text-gray-600">Total Rooms</p>
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <p className="text-2xl font-bold text-gray-900">{stats.occupancy.totalRooms}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Total Rooms</p>
                 </div>
-                <div className="text-center">
+                <div className="text-center p-3 bg-green-50 rounded-lg">
                   <p className="text-2xl font-bold text-green-600">{stats.occupancy.occupiedRooms}</p>
-                  <p className="text-xs text-gray-600">Occupied</p>
+                  <p className="text-xs text-muted-foreground mt-1">Occupied</p>
                 </div>
-                <div className="text-center">
+                <div className="text-center p-3 bg-blue-50 rounded-lg">
                   <p className="text-2xl font-bold text-blue-600">{stats.occupancy.availableRooms}</p>
-                  <p className="text-xs text-gray-600">Available</p>
+                  <p className="text-xs text-muted-foreground mt-1">Available</p>
                 </div>
               </div>
             </div>
@@ -222,7 +224,7 @@ export default function AdminDashboardPage() {
         </Card>
 
         {/* Quick Stats */}
-        <Card>
+        <Card className="shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
@@ -230,46 +232,52 @@ export default function AdminDashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Bookings */}
-              <Link href="/admin/bookings" className="block p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <Link href="/admin/bookings" className="block p-4 rounded-lg bg-red-50 hover:bg-red-100 transition-colors border border-red-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Calendar className="h-5 w-5 text-blue-600" />
+                    <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                      <Calendar className="h-5 w-5 text-red-600" />
+                    </div>
                     <div>
-                      <p className="font-medium">Pending Bookings</p>
-                      <p className="text-sm text-gray-600">Requires approval</p>
+                      <p className="font-semibold text-gray-900">Pending Bookings</p>
+                      <p className="text-sm text-muted-foreground">Requires approval</p>
                     </div>
                   </div>
-                  <Badge variant="destructive">{stats.bookings.pending}</Badge>
+                  <Badge variant="destructive" className="text-lg px-3 py-1">{stats.bookings.pending}</Badge>
                 </div>
               </Link>
 
               {/* Maintenance */}
-              <Link href="/admin/maintenance" className="block p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <Link href="/admin/maintenance" className="block p-4 rounded-lg bg-yellow-50 hover:bg-yellow-100 transition-colors border border-yellow-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <AlertCircle className="h-5 w-5 text-yellow-600" />
+                    <div className="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                      <AlertCircle className="h-5 w-5 text-yellow-600" />
+                    </div>
                     <div>
-                      <p className="font-medium">Pending Maintenance</p>
-                      <p className="text-sm text-gray-600">Needs assignment</p>
+                      <p className="font-semibold text-gray-900">Pending Maintenance</p>
+                      <p className="text-sm text-muted-foreground">Needs assignment</p>
                     </div>
                   </div>
-                  <Badge className="bg-yellow-100 text-yellow-800">{stats.maintenance.pending}</Badge>
+                  <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white text-lg px-3 py-1">{stats.maintenance.pending}</Badge>
                 </div>
               </Link>
 
               {/* Payments */}
-              <Link href="/admin/payments" className="block p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <Link href="/admin/payments" className="block p-4 rounded-lg bg-green-50 hover:bg-green-100 transition-colors border border-green-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <CreditCard className="h-5 w-5 text-green-600" />
+                    <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                      <CreditCard className="h-5 w-5 text-green-600" />
+                    </div>
                     <div>
-                      <p className="font-medium">Pending Payments</p>
-                      <p className="text-sm text-gray-600">Awaiting confirmation</p>
+                      <p className="font-semibold text-gray-900">Pending Payments</p>
+                      <p className="text-sm text-muted-foreground">Awaiting confirmation</p>
                     </div>
                   </div>
-                  <Badge className="bg-green-100 text-green-800">{stats.payments.pendingPayments}</Badge>
+                  <Badge className="bg-green-500 hover:bg-green-600 text-white text-lg px-3 py-1">{stats.payments.pendingPayments}</Badge>
                 </div>
               </Link>
             </div>
@@ -278,7 +286,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      <Card className="shadow-md">
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
@@ -286,34 +294,42 @@ export default function AdminDashboardPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link 
               href="/admin/tenants"
-              className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-600 hover:bg-purple-50 transition-colors text-center"
+              className="p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-center group"
             >
-              <Users className="h-8 w-8 mx-auto mb-2 text-gray-600" />
-              <p className="font-medium text-sm">Manage Tenants</p>
+              <div className="h-12 w-12 rounded-full bg-purple-100 group-hover:bg-purple-200 mx-auto mb-3 flex items-center justify-center transition-colors">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+              <p className="font-semibold text-sm">Manage Tenants</p>
             </Link>
             
             <Link 
               href="/admin/bookings"
-              className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-600 hover:bg-purple-50 transition-colors text-center"
+              className="p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-center group"
             >
-              <Calendar className="h-8 w-8 mx-auto mb-2 text-gray-600" />
-              <p className="font-medium text-sm">View Bookings</p>
+              <div className="h-12 w-12 rounded-full bg-blue-100 group-hover:bg-blue-200 mx-auto mb-3 flex items-center justify-center transition-colors">
+                <Calendar className="h-6 w-6 text-blue-600" />
+              </div>
+              <p className="font-semibold text-sm">View Bookings</p>
             </Link>
             
             <Link 
               href="/admin/maintenance"
-              className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-600 hover:bg-purple-50 transition-colors text-center"
+              className="p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-yellow-500 hover:bg-yellow-50 transition-all text-center group"
             >
-              <Wrench className="h-8 w-8 mx-auto mb-2 text-gray-600" />
-              <p className="font-medium text-sm">Assign Tasks</p>
+              <div className="h-12 w-12 rounded-full bg-yellow-100 group-hover:bg-yellow-200 mx-auto mb-3 flex items-center justify-center transition-colors">
+                <Wrench className="h-6 w-6 text-yellow-600" />
+              </div>
+              <p className="font-semibold text-sm">Assign Tasks</p>
             </Link>
             
             <Link 
               href="/admin/reports"
-              className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-600 hover:bg-purple-50 transition-colors text-center"
+              className="p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all text-center group"
             >
-              <CheckCircle className="h-8 w-8 mx-auto mb-2 text-gray-600" />
-              <p className="font-medium text-sm">View Reports</p>
+              <div className="h-12 w-12 rounded-full bg-green-100 group-hover:bg-green-200 mx-auto mb-3 flex items-center justify-center transition-colors">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+              <p className="font-semibold text-sm">View Reports</p>
             </Link>
           </div>
         </CardContent>
@@ -321,3 +337,4 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+

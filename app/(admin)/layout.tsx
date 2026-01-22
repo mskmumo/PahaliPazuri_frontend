@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
@@ -7,6 +7,7 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import AdminSidebar from '@/components/layout/AdminSidebar';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
+import BookingNotificationBadge from '@/components/admin/BookingNotificationBadge';
 import Link from 'next/link';
 import { 
   LayoutDashboard, 
@@ -16,11 +17,11 @@ import {
   Users, 
   CreditCard, 
   Wrench, 
-  MessageSquare, 
   FileText,
   BarChart3,
   Settings,
-  Bell 
+  Bell,
+  Ticket
 } from 'lucide-react';
 
 export default function AdminLayout({
@@ -46,7 +47,8 @@ export default function AdminLayout({
     { href: '/admin/tenants', label: 'Tenants', icon: Users },
     { href: '/admin/payments', label: 'Payments', icon: CreditCard },
     { href: '/admin/maintenance', label: 'Maintenance', icon: Wrench },
-    { href: '/admin/messages', label: 'Messages', icon: MessageSquare },
+    { href: '/admin/support-tickets', label: 'Support Tickets', icon: Ticket },
+    { href: '/admin/contacts', label: 'Contact Forms', icon: Bell },
     { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
     { href: '/admin/documents', label: 'Documents', icon: FileText },
     { href: '/admin/settings', label: 'Settings', icon: Settings },
@@ -94,6 +96,9 @@ export default function AdminLayout({
             </div>
             <div className="flex items-center space-x-4">
               <ThemeToggle />
+              <Link href="/admin/bookings">
+                <BookingNotificationBadge />
+              </Link>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/admin/notifications">
                   <Bell className="h-4 w-4 mr-2" />
@@ -104,8 +109,8 @@ export default function AdminLayout({
           </div>
         </div>
         
-        {/* Content Area */}
-        <div className="p-6 lg:p-8">
+        {/* Content Area - Full Width */}
+        <div className="p-6">
           {children}
         </div>
       </main>

@@ -13,11 +13,9 @@ export { default as bookingsApi, enhancedBookingsApi } from './bookings';
 export { default as paymentsApi } from './payments';
 export { default as pricingApi } from './pricing';
 export { default as maintenanceApi } from './maintenance';
-export { default as messagesApi } from './messages';
 export { default as documentsApi } from './documents';
 export { default as invoicesApi } from './invoices';
 export { default as notificationsApi } from './notifications';
-export { default as cmsApi } from './cms';
 export { default as tenantAllocationApi } from './tenant-allocation';
 export { default as adminApi } from './admin';
 

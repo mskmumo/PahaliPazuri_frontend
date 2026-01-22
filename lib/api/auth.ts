@@ -105,6 +105,25 @@ export const authApi = {
   },
 
   /**
+   * Request password reset email
+   */
+  forgotPassword: async (data: { email: string }): Promise<ApiResponse> => {
+    return apiClient.post<ApiResponse>('/auth/forgot-password', data);
+  },
+
+  /**
+   * Reset password with token
+   */
+  resetPassword: async (data: {
+    token: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+  }): Promise<ApiResponse> => {
+    return apiClient.post<ApiResponse>('/auth/reset-password', data);
+  },
+
+  /**
    * Get stored user from localStorage
    */
   getStoredUser: (): User | null => {

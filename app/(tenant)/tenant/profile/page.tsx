@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { getUserRoleName } from '@/lib/utils/role-helpers';
 
 export default function ProfilePage() {
   const { user, updateProfile } = useAuth();
@@ -238,7 +239,7 @@ export default function ProfilePage() {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Account Type</p>
-              <p className="font-medium capitalize">{user?.role || 'Tenant'}</p>
+              <p className="font-medium capitalize">{getUserRoleName(user)}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Member Since</p>

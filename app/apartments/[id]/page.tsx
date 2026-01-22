@@ -9,23 +9,27 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { ErrorMessage } from '@/components/shared/ErrorMessage';
+import { getValidImages, getImageAtIndex } from '@/lib/utils/image-helpers';
 import { Apartment } from '@/lib/types/api';
-import { 
-  Building2, 
-  MapPin, 
-  Bed, 
+import {
+  Building2,
+  MapPin,
+  Bed,
   ArrowLeft,
   Wifi,
   Car,
   Shield,
-  Zap
+  Zap,
+  Sparkles,
+  Users,
+  Layers
 } from 'lucide-react';
 
 export default function ApartmentDetailPage() {
   const params = useParams();
   const router = useRouter();
   const apartmentId = params.id as string;
-  
+
   const [apartment, setApartment] = useState<Apartment | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +66,7 @@ export default function ApartmentDetailPage() {
 
   if (loading) {
     return (
-      <div className="container py-12">
+      <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -70,10 +74,10 @@ export default function ApartmentDetailPage() {
 
   if (error || !apartment) {
     return (
-      <div className="container py-12">
-        <ErrorMessage message={error || 'Apartment not found'} />
-        <div className="mt-4 text-center">
-          <Button onClick={() => router.push('/apartments')}>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center">
+          <ErrorMessage message={error || 'Apartment not found'} />
+          <Button onClick={() => router.push('/apartments')} className="mt-4">
             Back to Apartments
           </Button>
         </div>
@@ -81,244 +85,224 @@ export default function ApartmentDetailPage() {
     );
   }
 
-  const amenityIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-    WiFi: Wifi,
-    Parking: Car,
-    Security: Shield,
-    Water: Zap,
-    'Backup Power': Zap,
+  const getAmenityIcon = (amenity: string) => {
+    const lowerAmenity = amenity.toLowerCase();
+    if (lowerAmenity.includes('wifi') || lowerAmenity.includes('internet')) return Wifi;
+    if (lowerAmenity.includes('park')) return Car;
+    if (lowerAmenity.includes('security')) return Shield;
+    if (lowerAmenity.includes('water') || lowerAmenity.includes('power')) return Zap;
+    return Sparkles;
   };
 
-  // Ensure arrays are properly formatted
   const amenitiesList = Array.isArray(apartment.amenities) ? apartment.amenities : [];
-  const imagesList = Array.isArray(apartment.images) ? apartment.images : [];
+  const imagesList = getValidImages(apartment.images);
 
   return (
-    <div className="container py-12">
-      {/* Back Button */}
-      <Button
-        variant="ghost"
-        onClick={() => router.push('/apartments')}
-        className="mb-6"
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Apartments
-      </Button>
-
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">{apartment.name}</h1>
-            <div className="flex items-center text-muted-foreground mb-2">
-              <MapPin className="h-4 w-4 mr-2" />
-              <span>{apartment.address}</span>
-            </div>
-            <p className="text-lg text-muted-foreground">{apartment.location}</p>
-          </div>
-          <Badge
-            variant={apartment.is_active ? 'default' : 'secondary'}
-            className="text-lg px-4 py-2"
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      {/* Header with proper padding */}
+      <div className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Button
+            variant="ghost"
+            onClick={() => router.push('/apartments')}
+            className="hover:bg-muted"
           >
-            {apartment.is_active ? 'Active' : 'Inactive'}
-          </Badge>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Apartments
+          </Button>
         </div>
       </div>
 
-      {/* Images */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="aspect-video bg-muted rounded-lg overflow-hidden relative">
-          {imagesList.length > 0 && imagesList[0] ? (
-            <Image
-              src={imagesList[0]}
-              alt={apartment.name}
-              fill
-              className="object-cover"
-              unoptimized
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Building2 className="h-24 w-24 text-muted-foreground" />
-            </div>
-          )}
-        </div>
-        {imagesList.length > 1 && (
-          <div className="grid grid-cols-2 gap-4">
-            {imagesList.slice(1, 5).map((image, idx) => (
-              <div
-                key={idx}
-                className="aspect-video bg-muted rounded-lg overflow-hidden relative"
-              >
-                {image ? (
-                  <Image
-                    src={image}
-                    alt={`${apartment.name} - ${idx + 2}`}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                ) : null}
-              </div>
-            ))}
+      {/* Main Content with centered container and good margins */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        {/* Header Section */}
+        <div className="mb-8 animate-fade-in-up">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <Badge className="badge-premium">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Premium
+            </Badge>
+            <Badge
+              className={`${apartment.is_active
+                  ? 'bg-green-500 text-white'
+                  : 'bg-gray-400 text-white'
+                }`}
+            >
+              {apartment.is_active ? 'Available' : 'Inactive'}
+            </Badge>
           </div>
-        )}
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Description */}
-          <Card>
-            <CardHeader>
-              <CardTitle>About This Apartment</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
-                {apartment.description || 'No description available.'}
-              </p>
-            </CardContent>
-          </Card>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3">
+            {apartment.name}
+          </h1>
 
-          {/* Amenities */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Amenities</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {amenitiesList.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {amenitiesList.map((amenity, idx) => {
-                    const Icon = amenityIcons[amenity] || Building2;
-                    return (
-                      <div key={idx} className="flex items-center space-x-2">
-                        <Icon className="h-5 w-5 text-primary" />
-                        <span className="text-sm">{amenity}</span>
-                      </div>
-                    );
-                  })}
-                </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <MapPin className="h-5 w-5 text-primary flex-shrink-0" />
+            <span>{apartment.address}</span>
+          </div>
+        </div>
+
+        {/* Image Gallery - Simplified */}
+        <div className="mb-10 animate-fade-in-up delay-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Main Image */}
+            <div className="aspect-[4/3] md:aspect-[16/10] bg-muted rounded-2xl overflow-hidden relative shadow-lg">
+              {getImageAtIndex(imagesList, 0) ? (
+                <Image
+                  src={getImageAtIndex(imagesList, 0)!}
+                  alt={apartment.name}
+                  fill
+                  className="object-cover hover:scale-105 transition-transform duration-500"
+                  unoptimized
+                />
               ) : (
-                <p className="text-muted-foreground">No amenities listed</p>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Building2 className="h-20 w-20 text-muted-foreground/20" />
+                </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Available Rooms */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Available Rooms</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Browse available rooms in this apartment building
-              </p>
-              <Link href={`/apartments/${apartmentId}/rooms`}>
-                <Button className="w-full">
-                  <Bed className="h-4 w-4 mr-2" />
-                  View Available Rooms
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+            {/* Secondary Images Grid */}
+            {imagesList.length > 1 && (
+              <div className="grid grid-cols-2 gap-4">
+                {imagesList.slice(1, 5).map((image, idx) => (
+                  <div
+                    key={idx}
+                    className="aspect-[4/3] bg-muted rounded-xl overflow-hidden relative shadow-md"
+                  >
+                    <Image
+                      src={image}
+                      alt={`${apartment.name} - ${idx + 2}`}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform duration-500"
+                      unoptimized
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Quick Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Total Floors</span>
-                <span className="font-semibold">{apartment.total_floors}</span>
-              </div>
-              {apartment.total_rooms && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Total Rooms</span>
-                  <span className="font-semibold">{apartment.total_rooms}</span>
-                </div>
-              )}
-              {apartment.available_rooms !== undefined && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Available</span>
-                  <span className="font-semibold text-green-600">
-                    {apartment.available_rooms}
-                  </span>
-                </div>
-              )}
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Location</span>
-                <span className="font-semibold">{apartment.location}</span>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Content Grid - Two Columns on Desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* Pricing Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Pricing</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {apartment.registration_fee != null && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Registration Fee</span>
-                  <span className="font-semibold">
-                    KES {apartment.registration_fee.toLocaleString()}
-                  </span>
-                </div>
-              )}
-              {apartment.cleaning_fee_monthly != null && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Cleaning Fee</span>
-                  <span className="font-semibold">
-                    KES {apartment.cleaning_fee_monthly.toLocaleString()}/mo
-                  </span>
-                </div>
-              )}
-              {apartment.security_deposit_percentage != null && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Deposit</span>
-                  <span className="font-semibold">
-                    {apartment.security_deposit_percentage}% of rent
-                  </span>
-                </div>
-              )}
-              {!apartment.electricity_included && apartment.electricity_token_contribution != null && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Electricity Token</span>
-                  <span className="font-semibold">
-                    KES {apartment.electricity_token_contribution.toLocaleString()}/mo
-                  </span>
-                </div>
-              )}
-              {apartment.registration_fee == null && 
-               apartment.cleaning_fee_monthly == null && 
-               apartment.security_deposit_percentage == null && (
-                <p className="text-sm text-muted-foreground text-center">
-                  Contact management for pricing details
+          {/* Left Column - Main Info */}
+          <div className="lg:col-span-2 space-y-8">
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-4 animate-fade-in-up delay-200">
+              <Card className="text-center p-6 border-0 shadow-md">
+                <Layers className="h-6 w-6 text-primary mx-auto mb-2" />
+                <div className="text-2xl font-bold">{apartment.total_floors}</div>
+                <div className="text-sm text-muted-foreground">Floors</div>
+              </Card>
+              <Card className="text-center p-6 border-0 shadow-md">
+                <Building2 className="h-6 w-6 text-primary mx-auto mb-2" />
+                <div className="text-2xl font-bold">{apartment.total_rooms || 0}</div>
+                <div className="text-sm text-muted-foreground">Rooms</div>
+              </Card>
+              <Card className="text-center p-6 border-0 shadow-md bg-green-50">
+                <Bed className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-green-600">{apartment.available_rooms || 0}</div>
+                <div className="text-sm text-muted-foreground">Available</div>
+              </Card>
+            </div>
+
+            {/* About Section */}
+            <Card className="border-0 shadow-md animate-fade-in-up delay-300">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-primary" />
+                  About This Property
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground leading-relaxed">
+                  {apartment.description || 'Modern apartment building with excellent amenities and 24/7 security. Designed for comfortable living in a prime location.'}
                 </p>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Contact CTA */}
-          <Card className="bg-primary text-primary-foreground">
-            <CardContent className="pt-6">
-              <h3 className="font-semibold mb-2">Interested?</h3>
-              <p className="text-sm mb-4 opacity-90">
-                View available rooms and book your stay today
-              </p>
-              <Link href={`/apartments/${apartmentId}/rooms`}>
-                <Button variant="secondary" className="w-full">
-                  View Rooms
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+            {/* Amenities */}
+            {amenitiesList.length > 0 && (
+              <Card className="border-0 shadow-md animate-fade-in-up delay-400">
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Amenities
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {amenitiesList.map((amenity, idx) => {
+                      const Icon = getAmenityIcon(amenity);
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg"
+                        >
+                          <Icon className="h-4 w-4 text-primary flex-shrink-0" />
+                          <span className="text-sm font-medium">{amenity}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Right Column - CTA */}
+          <div className="space-y-6 animate-slide-in-right">
+
+            {/* Location Card */}
+            <Card className="border-0 shadow-md">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <div>
+                    <div className="font-semibold">Location</div>
+                    <div className="text-sm text-muted-foreground">{apartment.location}</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Book Now CTA */}
+            <Card className="border-0 shadow-lg gradient-success text-white sticky top-24">
+              <CardContent className="pt-6 pb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                    <Users className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Ready to Book?</h3>
+                    <p className="text-sm text-white/80">
+                      {apartment.available_rooms || 0} rooms available
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-sm mb-5 text-white/90">
+                  Secure your space in this premium apartment today.
+                </p>
+
+                <Link href={`/rooms?apartment_id=${apartmentId}&apartment_name=${encodeURIComponent(apartment.name)}`}>
+                  <Button
+                    variant="secondary"
+                    className="w-full h-12 font-semibold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <Bed className="h-5 w-5 mr-2" />
+                    View Available Rooms
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { getUserRoleSlug } from '@/lib/utils/role-helpers';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -22,12 +23,15 @@ export function AuthGuard({ children, requiredRole, fallbackUrl = '/login' }: Au
         return;
       }
 
+      // Get role slug to handle both string and object formats
+      const userRole = getUserRoleSlug(user);
+
       // Check role if required
-      if (requiredRole && user.role !== requiredRole) {
+      if (requiredRole && userRole !== requiredRole) {
         // Redirect based on actual role
-        if (user.role === 'admin' || user.role === 'super-admin') {
+        if (userRole === 'admin' || userRole === 'super-admin') {
           router.push('/admin/dashboard');
-        } else if (user.role === 'tenant') {
+        } else if (userRole === 'tenant') {
           router.push('/tenant/dashboard');
         } else {
           router.push(fallbackUrl);
@@ -49,7 +53,8 @@ export function AuthGuard({ children, requiredRole, fallbackUrl = '/login' }: Au
   }
 
   // Show nothing while redirecting
-  if (!user || (requiredRole && user.role !== requiredRole)) {
+  const userRole = getUserRoleSlug(user);
+  if (!user || (requiredRole && userRole !== requiredRole)) {
     return null;
   }
 

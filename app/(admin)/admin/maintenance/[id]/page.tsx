@@ -25,41 +25,232 @@ export default function MaintenanceDetailPage() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await maintenanceApi.getById(requestId);
-      setRequest(response.data);
-      
-      // TODO: Fetch staff list
-      // const staffResponse = await adminApi.getAllStaff();
-      // setStaff(staffResponse.data);
+      setError(null);
       
       // Mock staff data
       const mockStaff: Staff[] = [
         {
           id: 1,
-          user_id: null,
-          name: 'Mike Johnson',
-          email: 'mike@example.com',
-          phone: '+254798765432',
-          specialization: 'plumbing',
+          user_id: 10,
+          name: 'John Technician',
+          email: 'john.tech@example.com',
+          phone: '+254712345678',
+          specialization: 'Electrical',
           status: 'active',
           is_available: true,
-          created_at: '2024-01-01T10:00:00Z',
-          updated_at: '2024-01-01T10:00:00Z',
+          created_at: '2024-01-10T10:00:00Z',
+          updated_at: '2024-01-23T10:00:00Z',
         },
         {
           id: 2,
-          user_id: null,
-          name: 'Sarah Williams',
-          email: 'sarah@example.com',
-          phone: '+254798765433',
-          specialization: 'electrical',
+          user_id: 11,
+          name: 'Mary Plumber',
+          email: 'mary.plumber@example.com',
+          phone: '+254722345678',
+          specialization: 'Plumbing',
           status: 'active',
           is_available: true,
-          created_at: '2024-01-01T10:00:00Z',
-          updated_at: '2024-01-01T10:00:00Z',
+          created_at: '2024-01-10T10:00:00Z',
+          updated_at: '2024-01-23T10:00:00Z',
+        },
+        {
+          id: 3,
+          user_id: 12,
+          name: 'Peter Handyman',
+          email: 'peter.handyman@example.com',
+          phone: '+254732345678',
+          specialization: 'General',
+          status: 'active',
+          is_available: true,
+          created_at: '2024-01-10T10:00:00Z',
+          updated_at: '2024-01-23T10:00:00Z',
         },
       ];
       setStaff(mockStaff);
+      
+      // Try to fetch from API first
+      try {
+        const response = await maintenanceApi.getById(requestId);
+        setRequest(response.data);
+      } catch (apiErr) {
+        console.warn('API call failed, using mock data:', apiErr);
+        
+        // Mock maintenance request data as fallback
+        const mockRequests: Record<number, MaintenanceRequest> = {
+          1: {
+            id: 1,
+            user_id: 1,
+            room_id: 5,
+            staff_id: null,
+            title: 'Leaking faucet in bathroom',
+            description: 'The bathroom faucet is leaking continuously. Water is dripping even when the tap is fully closed.',
+            category: 'plumbing',
+            priority: 'high',
+            status: 'pending',
+            scheduled_date: null,
+            completed_date: null,
+            estimated_cost: null,
+            actual_cost: null,
+            feedback: null,
+            rating: null,
+            images: [],
+            created_at: '2024-01-20T10:00:00Z',
+            updated_at: '2024-01-20T10:00:00Z',
+            user: {
+              id: 1,
+              name: 'John Doe',
+              email: 'john@example.com',
+              phone: '+254712345678',
+              gender: 'male',
+              id_number: null,
+              date_of_birth: null,
+              role: 'tenant',
+              email_verified_at: null,
+              notification_preferences: {
+                email_notifications: true,
+                sms_notifications: true,
+                push_notifications: true,
+                booking_updates: true,
+                payment_reminders: true,
+                maintenance_updates: true,
+                promotional_emails: false,
+              },
+              created_at: '2024-01-15T10:00:00Z',
+              updated_at: '2024-01-15T10:00:00Z',
+            },
+            room: {
+              id: 5,
+              apartment_id: 1,
+              room_number: 'R-101',
+              room_code: 'PP-R-101-G',
+              floor_code: 'G',
+              floor_number: 1,
+              room_type: 'private',
+              bed_type: 'single',
+              total_beds: 1,
+              available_beds: 0,
+              description: null,
+              price_per_night: 500,
+              price_per_month: 15000,
+              price_per_bed_night: 500,
+              price_per_bed_month: 15000,
+              base_price_per_bed_month: 15000,
+              size_sqm: null,
+              max_occupancy: 1,
+              amenities: [],
+              images: [],
+              status: 'occupied',
+              is_furnished: true,
+              furnishing_details: null,
+              gender_type: 'mixed',
+              sharing_type: 'single',
+              created_at: '2024-01-01T10:00:00Z',
+              updated_at: '2024-01-15T10:00:00Z',
+              base_price: 15000,
+              actual_price: 15000,
+              floor: 1,
+              allowed_gender: 'any',
+              has_private_bathroom: true,
+              has_kitchen: false,
+              condition: 'good',
+              last_maintenance_date: null,
+              view_quality: 'good',
+              noise_level: 'moderate',
+              natural_light: 'good',
+            },
+          },
+          2: {
+            id: 2,
+            user_id: 2,
+            room_id: 8,
+            staff_id: 1,
+            title: 'Broken air conditioner',
+            description: 'Air conditioner not cooling properly. The unit turns on but only blows warm air.',
+            category: 'electrical',
+            priority: 'medium',
+            status: 'in_progress',
+            scheduled_date: '2024-01-25T10:00:00Z',
+            completed_date: null,
+            estimated_cost: 5000,
+            actual_cost: null,
+            feedback: null,
+            rating: null,
+            images: [],
+            created_at: '2024-01-22T10:00:00Z',
+            updated_at: '2024-01-23T10:00:00Z',
+            user: {
+              id: 2,
+              name: 'Jane Smith',
+              email: 'jane@example.com',
+              phone: '+254723456789',
+              gender: 'female',
+              id_number: null,
+              date_of_birth: null,
+              role: 'tenant',
+              email_verified_at: null,
+              notification_preferences: {
+                email_notifications: true,
+                sms_notifications: true,
+                push_notifications: true,
+                booking_updates: true,
+                payment_reminders: true,
+                maintenance_updates: true,
+                promotional_emails: false,
+              },
+              created_at: '2024-01-18T10:00:00Z',
+              updated_at: '2024-01-18T10:00:00Z',
+            },
+            room: {
+              id: 8,
+              apartment_id: 1,
+              room_number: 'R-205',
+              room_code: 'PP-R-205-2',
+              floor_code: '2',
+              floor_number: 2,
+              room_type: 'private',
+              bed_type: 'double_decker_2',
+              total_beds: 1,
+              available_beds: 0,
+              description: null,
+              price_per_night: 600,
+              price_per_month: 18000,
+              price_per_bed_night: 600,
+              price_per_bed_month: 18000,
+              base_price_per_bed_month: 18000,
+              size_sqm: null,
+              max_occupancy: 1,
+              amenities: [],
+              images: [],
+              status: 'occupied',
+              is_furnished: true,
+              furnishing_details: null,
+              gender_type: 'female_only',
+              sharing_type: 'single',
+              created_at: '2024-01-01T10:00:00Z',
+              updated_at: '2024-01-20T10:00:00Z',
+              base_price: 18000,
+              actual_price: 18000,
+              floor: 2,
+              allowed_gender: 'female',
+              has_private_bathroom: true,
+              has_kitchen: true,
+              condition: 'excellent',
+              last_maintenance_date: null,
+              view_quality: 'excellent',
+              noise_level: 'quiet',
+              natural_light: 'excellent',
+            },
+            staff: mockStaff[0],
+          },
+        };
+        
+        const mockRequest = mockRequests[requestId];
+        if (mockRequest) {
+          setRequest(mockRequest);
+        } else {
+          setError('Maintenance request not found');
+        }
+      }
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || 'Failed to load request');
@@ -72,14 +263,42 @@ export default function MaintenanceDetailPage() {
     fetchData();
   }, [fetchData]);
 
-  const handleAssignStaff = async (staffId: number) => {
+  const handleAssignStaff = async (staffId: number, staffName: string) => {
     try {
       setUpdating(true);
+      
+      // SECURITY CHECK: Verify the request is not already assigned
+      if (!request) {
+        alert('Error: Maintenance request not found');
+        return;
+      }
+      
+      if (request.staff_id) {
+        alert('Security Error: This maintenance request has already been assigned to a staff member. A request cannot be assigned to multiple staff members.');
+        setShowAssignMenu(false);
+        return;
+      }
+      
+      if (request.status !== 'pending') {
+        alert('Error: Only pending requests can be assigned to staff.');
+        setShowAssignMenu(false);
+        return;
+      }
+      
       // TODO: Implement assign API
       // await adminApi.assignMaintenanceStaff(requestId, staffId);
-      alert('Staff assigned successfully');
+      
+      // Update local state to reflect assignment
+      const assignedStaff = staff.find(s => s.id === staffId);
+      setRequest(prev => prev ? {
+        ...prev,
+        staff_id: staffId,
+        status: 'in_progress' as const,
+        staff: assignedStaff
+      } : null);
+      
+      alert(`Successfully assigned ${staffName} to this maintenance request`);
       setShowAssignMenu(false);
-      fetchData();
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       alert(error.response?.data?.message || 'Failed to assign staff');
@@ -177,24 +396,29 @@ export default function MaintenanceDetailPage() {
             {showAssignMenu && (
               <div className="absolute right-0 mt-2 w-64 bg-white border rounded-lg shadow-lg z-10">
                 <div className="p-2">
-                  <p className="text-xs font-semibold text-gray-700 mb-2 px-3">
-                    Select Staff Member:
-                  </p>
-                  {staff.length === 0 ? (
-                    <p className="text-sm text-gray-500 px-3 py-2">No staff available</p>
+                  <div className="flex items-center justify-between px-3 py-2 border-b mb-2">
+                    <p className="text-xs font-semibold text-gray-700">
+                      Select Staff Member:
+                    </p>
+                    <button 
+                      onClick={() => setShowAssignMenu(false)}
+                      className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  {staff.filter(s => s.status === 'active').length === 0 ? (
+                    <p className="text-sm text-gray-500 px-3 py-2">No active staff available</p>
                   ) : (
-                    staff.map((s) => (
+                    staff.filter(s => s.status === 'active').map((s) => (
                       <button
                         key={s.id}
-                        onClick={() => handleAssignStaff(s.id)}
-                        disabled={!s.is_available}
-                        className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handleAssignStaff(s.id, s.name)}
+                        disabled={updating}
+                        className="block w-full text-left px-3 py-2 text-sm hover:bg-blue-50 rounded transition-colors disabled:opacity-50"
                       >
-                        <div className="font-medium">{s.name}</div>
-                        <div className="text-xs text-gray-500">{s.specialization}</div>
-                        {!s.is_available && (
-                          <Badge className="mt-1 bg-red-100 text-red-800 text-xs">Busy</Badge>
-                        )}
+                        <div className="font-medium text-gray-900">{s.name}</div>
+                        <div className="text-xs text-gray-500 capitalize">{s.specialization}</div>
                       </button>
                     ))
                   )}

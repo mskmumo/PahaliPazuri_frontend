@@ -346,8 +346,8 @@ export const getAllTenants = async (params?: {
 };
 
 export const getTenant = async (id: number): Promise<ApiResponse<User>> => {
-  const response = await apiClient.get<User>(`/admin/tenants/${id}`);
-  return { success: true, data: response };
+  const response = await apiClient.get<ApiResponse<User>>(`/admin/tenants/${id}`);
+  return response;
 };
 
 export const createTenant = async (data: {

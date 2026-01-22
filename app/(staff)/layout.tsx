@@ -94,7 +94,7 @@ export default function StaffLayout({
         </div>
         
         {/* Content Area */}
-        <div className="p-6 lg:p-8">
+        <div className="p-6">
           {children}
         </div>
       </main>

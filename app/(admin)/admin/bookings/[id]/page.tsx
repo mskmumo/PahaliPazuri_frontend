@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar, MapPin, User, Check, X } from 'lucide-react';
 import Link from 'next/link';
 import { Booking } from '@/lib/types/api';
-import { bookingsApi, adminApi } from '@/lib/api';
+import { adminApi } from '@/lib/api';
 
 export default function BookingDetailPage() {
   const params = useParams();
@@ -23,8 +23,10 @@ export default function BookingDetailPage() {
   const fetchBooking = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await bookingsApi.getBooking(bookingId);
-      setBooking(response.data);
+      const response = await adminApi.bookings.getById(bookingId);
+      // Handle both response formats: { data: booking } or { booking: booking }
+      const bookingData = response.data || (response as any).booking;
+      setBooking(bookingData);
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || 'Failed to load booking');
@@ -42,7 +44,7 @@ export default function BookingDetailPage() {
 
     try {
       setUpdating(true);
-      await adminApi.approveBooking(bookingId);
+      await adminApi.bookings.approve(bookingId);
       alert('Booking approved successfully');
       fetchBooking();
       router.push('/admin/bookings');
@@ -55,17 +57,21 @@ export default function BookingDetailPage() {
   };
 
   const handleReject = async () => {
-    const reason = prompt('Reason for rejection (optional):');
-    if (reason === null) return; // User cancelled
+    const reason = prompt('Please enter a reason for cancellation:');
+    if (reason === null) return; // User cancelled prompt
+    if (!reason.trim()) {
+      alert('Cancellation reason is required');
+      return;
+    }
 
     try {
       setUpdating(true);
-      await adminApi.rejectBooking(bookingId, reason);
-      alert('Booking rejected');
+      await adminApi.bookings.cancel(bookingId, reason);
+      alert('Booking cancelled successfully');
       router.push('/admin/bookings');
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
-      alert(error.response?.data?.message || 'Failed to reject booking');
+      alert(error.response?.data?.message || 'Failed to cancel booking');
     } finally {
       setUpdating(false);
     }
@@ -125,7 +131,7 @@ export default function BookingDetailPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Back button */}
-      <Link 
+      <Link
         href="/admin/bookings"
         className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
       >
@@ -167,6 +173,31 @@ export default function BookingDetailPage() {
               Reject
             </Button>
           </div>
+        )}
+
+        {/* Cancel button for confirmed bookings */}
+        {booking.status === 'confirmed' && (
+          <Button
+            onClick={handleReject}
+            disabled={updating}
+            variant="outline"
+            className="text-red-600 hover:text-red-700"
+          >
+            <X className="h-4 w-4 mr-2" />
+            Cancel Booking
+          </Button>
+        )}
+
+        {/* Re-approve button for cancelled bookings */}
+        {booking.status === 'cancelled' && (
+          <Button
+            onClick={handleApprove}
+            disabled={updating}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <Check className="h-4 w-4 mr-2" />
+            Re-approve Booking
+          </Button>
         )}
       </div>
 
@@ -259,34 +290,34 @@ export default function BookingDetailPage() {
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-gray-600">Base Rent</span>
-              <span className="font-medium">KES {booking.base_rent.toLocaleString()}</span>
+              <span className="font-medium">KES {(booking.base_rent || 0).toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Service Fee</span>
-              <span className="font-medium">KES {booking.service_fee.toLocaleString()}</span>
+              <span className="font-medium">KES {(booking.service_fee || 0).toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Deposit</span>
-              <span className="font-medium">KES {booking.deposit_amount.toLocaleString()}</span>
+              <span className="font-medium">KES {(booking.deposit_amount || 0).toLocaleString()}</span>
             </div>
-            {booking.discount_amount > 0 && (
+            {(booking.discount_amount || 0) > 0 && (
               <div className="flex justify-between text-green-600">
                 <span>Discount</span>
-                <span>- KES {booking.discount_amount.toLocaleString()}</span>
+                <span>- KES {(booking.discount_amount || 0).toLocaleString()}</span>
               </div>
             )}
             <div className="flex justify-between font-semibold pt-3 border-t">
               <span>Total Amount</span>
-              <span>KES {booking.total_amount.toLocaleString()}</span>
+              <span>KES {(booking.total_amount || 0).toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Amount Paid</span>
-              <span className="font-medium text-green-600">KES {booking.amount_paid.toLocaleString()}</span>
+              <span className="font-medium text-green-600">KES {(booking.amount_paid || 0).toLocaleString()}</span>
             </div>
             <div className="flex justify-between font-semibold">
               <span>Balance</span>
-              <span className={booking.balance > 0 ? 'text-red-600' : 'text-green-600'}>
-                KES {booking.balance.toLocaleString()}
+              <span className={(booking.balance || 0) > 0 ? 'text-red-600' : 'text-green-600'}>
+                KES {(booking.balance || 0).toLocaleString()}
               </span>
             </div>
           </div>

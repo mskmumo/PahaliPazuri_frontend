@@ -41,6 +41,23 @@ export const roomsApi = {
       data
     );
   },
+
+  /**
+   * Get detailed bed availability with real-time status
+   */
+  getBedAvailability: async (
+    id: number,
+    params: {
+      check_in_date: string;
+      duration_months?: number;
+      check_out_date?: string;
+    }
+  ): Promise<ApiResponse<any>> => {
+    return apiClient.get<ApiResponse<any>>(
+      `/rooms/${id}/beds/availability`,
+      params
+    );
+  },
 };
 
 export default roomsApi;

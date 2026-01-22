@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,26 +11,70 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Loader2, Upload, X } from 'lucide-react';
 import Link from 'next/link';
 import { maintenanceApi } from '@/lib/api';
+import { enhancedBookingsApi } from '@/lib/api/bookings';
+
+interface Booking {
+  id: number;
+  room: {
+    id: number;
+    room_number: string;
+    apartment: {
+      name: string;
+    };
+  };
+  status: string;
+}
 
 export default function NewMaintenanceRequestPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
   
   const [formData, setFormData] = useState({
     room_id: '',
     title: '',
     description: '',
-    category: '',
+    issue_type: '',
     priority: 'medium',
   });
   
   const [images, setImages] = useState<File[]>([]);
 
+  // Fetch user's bookings on mount
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const fetchBookings = async () => {
+    try {
+      setLoadingBookings(true);
+      const response = await enhancedBookingsApi.getMyBookings();
+      // Only show confirmed bookings
+      const confirmedBookings = (response.data || []).filter(
+        (booking) => booking.status === 'confirmed' || booking.status === 'active'
+      ).map(booking => ({
+        id: booking.id,
+        room: booking.room ? {
+          id: booking.room.id,
+          room_number: booking.room.room_number,
+          apartment: booking.room.apartment ? { name: booking.room.apartment.name } : { name: 'Unknown' }
+        } : { id: 0, room_number: 'Unknown', apartment: { name: 'Unknown' } },
+        status: booking.status
+      }));
+      setBookings(confirmedBookings);
+    } catch (err) {
+      console.error('Failed to load bookings:', err);
+    } finally {
+      setLoadingBookings(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.room_id || !formData.title || !formData.description || !formData.category) {
+    if (!formData.room_id || !formData.description || !formData.issue_type) {
       setError('Please fill in all required fields');
       return;
     }
@@ -39,11 +83,16 @@ export default function NewMaintenanceRequestPage() {
       setLoading(true);
       setError(null);
 
+      // Combine title and description - backend only expects description
+      const fullDescription = formData.title 
+        ? `${formData.title}\n\n${formData.description}` 
+        : formData.description;
+
       const submitData = {
         room_id: parseInt(formData.room_id),
-        title: formData.title,
-        description: formData.description,
-        category: formData.category as 'plumbing' | 'electrical' | 'appliance' | 'structural' | 'other',
+        title: formData.title || 'Maintenance Request',
+        description: fullDescription,
+        category: formData.issue_type as 'plumbing' | 'electrical' | 'appliance' | 'structural' | 'other',
         priority: formData.priority as 'low' | 'medium' | 'high' | 'urgent',
         images: images,
       };
@@ -98,13 +147,32 @@ export default function NewMaintenanceRequestPage() {
 
             <div className="space-y-2">
               <Label htmlFor="room_id">Room Number *</Label>
-              <Input
-                id="room_id"
-                placeholder="Enter your room number"
-                value={formData.room_id}
-                onChange={(e) => setFormData({ ...formData, room_id: e.target.value })}
-                required
-              />
+              {loadingBookings ? (
+                <div className="flex items-center justify-center p-4 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Loading your rooms...
+                </div>
+              ) : bookings.length === 0 ? (
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 rounded-md text-sm">
+                  You don't have any confirmed bookings yet. Please book a room first.
+                </div>
+              ) : (
+                <Select
+                  value={formData.room_id}
+                  onValueChange={(value) => setFormData({ ...formData, room_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your room" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {bookings.map((booking) => (
+                      <SelectItem key={booking.id} value={booking.room.id.toString()}>
+                        Room {booking.room.room_number} - {booking.room.apartment.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -120,10 +188,10 @@ export default function NewMaintenanceRequestPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
+                <Label htmlFor="issue_type">Category *</Label>
                 <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                  value={formData.issue_type}
+                  onValueChange={(value) => setFormData({ ...formData, issue_type: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
@@ -132,8 +200,8 @@ export default function NewMaintenanceRequestPage() {
                     <SelectItem value="plumbing">Plumbing</SelectItem>
                     <SelectItem value="electrical">Electrical</SelectItem>
                     <SelectItem value="cleaning">Cleaning</SelectItem>
-                    <SelectItem value="furniture">Furniture</SelectItem>
-                    <SelectItem value="appliances">Appliances</SelectItem>
+                    <SelectItem value="appliance">Appliance</SelectItem>
+                    <SelectItem value="structural">Structural</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
